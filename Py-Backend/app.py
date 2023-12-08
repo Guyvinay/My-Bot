@@ -12,8 +12,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 # Set your OpenAI API key
-# openai.api_key = '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'
-# openai.api_key = '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'
 openai.api_key = ''
 
 class ConversationHistory(db.Model):
