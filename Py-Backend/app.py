@@ -18,7 +18,7 @@ openai.api_key = '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'
 
 class ConversationHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    message = db.Column(db.String(1000), nullable=False)
+    message = db.Column(db.String(2000), nullable=False)
 
 # db.create_all()
 with app.app_context():
@@ -65,8 +65,8 @@ def send_message():
             db.session.add(chatbot_history)
             db.session.commit()
 
-        return jsonify(conversation_history)
-        # return jsonify(response)
+        # return jsonify(conversation_history)
+        return jsonify(chatbot_response)
 
     except Exception as e:
         # Handle exceptions and return an error response
