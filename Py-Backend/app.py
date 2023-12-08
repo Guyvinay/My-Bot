@@ -14,7 +14,7 @@ db = SQLAlchemy(app)
 # Set your OpenAI API key
 # openai.api_key = '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'
 # openai.api_key = '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'
-openai.api_key = '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'
+openai.api_key = ''
 
 class ConversationHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
