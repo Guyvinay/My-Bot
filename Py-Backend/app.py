@@ -29,13 +29,14 @@ class Chat(db.Model):
 class Conversation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     chat_id = db.Column(db.Integer, db.ForeignKey('chat.id'), nullable=False)
-    prompt = db.Column(db.String(500), nullable=False)
-    response = db.Column(db.String(500), nullable=False)
+    prompt = db.Column(db.String(1500), nullable=False)
+    response = db.Column(db.String(4000), nullable=False)
 
 #Creating modals
 with app.app_context():
     db.create_all()
 
+# conversation_history = []
 
 #endpoint for creating user
 @app.route('/users', methods=['POST'])
@@ -77,7 +78,6 @@ def create_users():
 @app.route('/users',methods=['GET'])
 def get_all_users() :
     try :
-
         users = Users.query.all()
         users_list = [
             {
@@ -228,8 +228,22 @@ def get_a_chat_of_a_user(username, chat_id):
            return jsonify({
                 'error':f'Chat ID: {chat_id}, not found!'
             })
+        
+        print(chat.conversations[3].response)
+
         # chat_list = [{'chat_id': chat.id, 'title': chat.title, 'description': chat.description} for chat in user.chats]
         # print(chat_list)
+
+
+        conversation_list = [
+            {
+                'conversation_id': conversation.id, 'prompt': conversation.prompt, 
+                'description': conversation.response
+            } 
+            for conversation in chat.conversations
+            ]
+        print(conversation_list)
+
 
         # print(chat.title)
         # chat = next(
@@ -242,7 +256,9 @@ def get_a_chat_of_a_user(username, chat_id):
             'id':chat.id,
             'title':chat.title,
             'description':chat.description,
-            'user_id':chat.user_id
+            'user_id':chat.user_id,
+            'conversations':conversation_list,
+            'total_conversation':len(conversation_list)
         })
 
     except Exception as e:
@@ -298,6 +314,7 @@ def create_conversation_with_openai(username,chat_id) :
     try :
         data = request.get_json()
         prompt = data.get('prompt','')
+        user_prompt = data.get('prompt','')
         # print(username+" "+chat_id)
         #Retrieving user with username
         user = Users.query.filter_by(username=username).first()
@@ -312,8 +329,18 @@ def create_conversation_with_openai(username,chat_id) :
            return jsonify({
                 'error':f'Chat ID: {chat_id}, not found!'
             })
-        # print(chat)
 
+        conversation_history = Conversation.query.filter_by(chat_id=chat_id).all()
+        # print(conversation_history)
+
+        if conversation_history:
+            chat_history = '\n'.join([f'User: {conv.prompt}\nChatbot: {conv.response}' for conv in conversation_history])
+            prompt = f'{chat_history}\nUser: {prompt}\n'
+        else:
+            # If no conversation history exists, start with the user's prompt
+            prompt = f'User: {prompt}\n'
+
+        print(prompt)
 
         #Calling open AI api 
         response = openai.Completion.create(
@@ -323,13 +350,18 @@ def create_conversation_with_openai(username,chat_id) :
         )
 
         # Extract the generated message from the OpenAI response
-        openai_response = response['choices'][0]['text'].strip()
+        bot_response = response['choices'][0]['text'].strip()
 
-        print(openai_response)
+        new_conversation = Conversation(chat_id=chat_id, prompt=user_prompt, response=bot_response)
+        db.session.add(new_conversation)
+        db.session.commit()
+
+        print(new_conversation)
 
 
         return jsonify({
-            "ststus":openai_response
+            "prompt":new_conversation.prompt,
+            "response":bot_response
         })
 
 
@@ -337,7 +369,8 @@ def create_conversation_with_openai(username,chat_id) :
         error_message = f"An error occurred: {str(ex)}"
         return jsonify({'error': error_message}), 500
 
-
+# Getting conversation of a particular chat
+# @app.route('/chats/<username>/<chat_id>/')
 
 
 if __name__ == '__main__':
