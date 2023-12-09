@@ -44,3 +44,10 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd

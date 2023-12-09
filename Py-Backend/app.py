@@ -2,6 +2,16 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 import openai
+from dotenv import load_dotenv
+
+load_dotenv()
+
+import os
+
+api_secret_key = os.getenv("API_SECRET_KEY")
+
+
+# pip install python-dotenv
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -10,7 +20,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:root@localhost/mybot'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-openai.api_key = ''
+openai.api_key = api_secret_key
 
 class Users(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -88,7 +98,7 @@ def get_all_users() :
             }
             for user in users
         ]
-        print(users_list)
+        # print(users_list)
         return jsonify({
             'users':users_list,
             'total_users':len(users_list)
@@ -150,7 +160,7 @@ def create_chats(username) :
         description = data.get('description','')
         # print(title+" "+description)
         user = Users.query.filter_by(username=username).first()
-        print(user)
+        # print(user)
         if user :
             new_chat = Chat(
                 user_id = user.id,
@@ -311,6 +321,7 @@ def delete_chat_of_a_user(username,chat_id):
 #chat-OPS-DONE-here
 
 #Conversation-withopen-ai-starts-here
+
 @app.route('/chats/<username>/<chat_id>',methods=['POST'])
 def create_conversation_with_openai(username,chat_id) : 
     try :
@@ -342,7 +353,7 @@ def create_conversation_with_openai(username,chat_id) :
             # If no conversation history exists, start with the user's prompt
             prompt = f'User: {prompt}\n'
 
-        print(prompt)
+        # print(prompt)
 
         #Calling open AI api 
         response = openai.Completion.create(
@@ -358,7 +369,7 @@ def create_conversation_with_openai(username,chat_id) :
         db.session.add(new_conversation)
         db.session.commit()
 
-        print(new_conversation)
+        # print(new_conversation)
 
 
         return jsonify({
