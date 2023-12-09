@@ -73,5 +73,71 @@ def create_users():
         error_message = f"An error occurred: {str(ex)}"
         return jsonify({'error': error_message}), 500
 
+#Endpoint for Get All users
+@app.route('/users',methods=['GET'])
+def get_all_users() :
+    try :
+
+        users = Users.query.all()
+        users_list = [
+            {
+                'user_id':user.id,
+                'username':user.username,
+                'name':user.name
+            }
+            for user in users
+        ]
+        print(users_list)
+        return jsonify({
+            'users':users_list,
+            'total_users':len(users_list)
+        })
+
+    except Exception as ex : 
+        error_message = f"An error occurred: {str(ex)}"
+        return jsonify({
+            'error':error_message
+        })
+
+
+#Endpoint for Get users by username
+@app.route('/users/<username>', methods=['GET'])
+def get_user_by_username(username) : 
+    try:
+        # user = Users.query.get(username)
+        user = Users.query.filter_by(username=username).first()
+        if user:
+            return jsonify({'user_id': user.id, 'username': user.username, 'name': user.name})
+        else:
+            return jsonify({'error': 'User not found'}), 404
+
+    except Exception as e:
+        # Handle exceptions and return an error response
+        error_message = f"An error occurred: {str(e)}"
+        return jsonify({'error': error_message}), 500
+
+#Endpoint for update user by username
+#Endpoint for delete user
+# Delete a user
+@app.route('/users/<username>', methods=['DELETE'])
+def delete_user(username):
+    try:
+        # user = Users.query.get(user_id)
+        user = Users.query.filter_by(username=username).first()
+        if user:
+            db.session.delete(user)
+            db.session.commit()
+            return jsonify({'message': 'User deleted successfully'})
+        else:
+            return jsonify({'error': 'User not found'}), 404
+
+    except Exception as e:
+        # Handle exceptions and return an error response
+        error_message = f"An error occurred: {str(e)}"
+        return jsonify({'error': error_message}), 500
+
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)
