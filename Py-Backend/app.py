@@ -290,6 +290,36 @@ def delete_chat_of_a_user(username,chat_id):
         error_message = f"An error occurred: {str(e)}"
         return jsonify({'error': error_message}), 500
 
+#chat-OPS-DONE-here
+
+#Conversation-withopen-ai-starts-here
+@app.route('chats/<username>/<chat_id>',methods=['POST'])
+def create_conversation_with_openai(username,chat_id) : 
+    try :
+        # print(username+" "+chat_id)
+        #Retrieving user with username
+        user = Users.query.filter_by(username=username).first()
+        if not user :
+            return jsonify({
+                'error':f'Username: {username}, not found!'
+            })
+        #Retrieving chat with chat_id
+        chat = Chat.query.filter_by(id=chat_id,user_id=user.id).first()
+
+        if not chat :
+           return jsonify({
+                'error':f'Chat ID: {chat_id}, not found!'
+            })
+        print(chat)
+        return jsonify({
+            "ststus":"OK"
+        })
+
+
+    except Exception as ex : 
+        error_message = f"An error occurred: {str(e)}"
+        return jsonify({'error': error_message}), 500
+
 
 
 
