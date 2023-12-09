@@ -10,7 +10,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:root@localhost/mybot'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-openai.api_key = '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'
+openai.api_key = ''
 
 class Users(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -229,7 +229,7 @@ def get_a_chat_of_a_user(username, chat_id):
                 'error':f'Chat ID: {chat_id}, not found!'
             })
         
-        print(chat.conversations[3].response)
+        # print(chat.conversations[3].response)
 
         # chat_list = [{'chat_id': chat.id, 'title': chat.title, 'description': chat.description} for chat in user.chats]
         # print(chat_list)
