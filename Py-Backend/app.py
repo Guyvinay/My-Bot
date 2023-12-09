@@ -136,6 +136,160 @@ def delete_user(username):
         error_message = f"An error occurred: {str(e)}"
         return jsonify({'error': error_message}), 500
 
+# Users-OPS-OVER-HERE
+
+#Chats-OPS-STARTS-here
+
+#Endpoint for creating Chat
+@app.route('/chats/<username>', methods=['POST'])
+def create_chats(username) : 
+    try :
+        data = request.get_json()
+        title = data.get('title','')
+        description = data.get('description','')
+        # print(title+" "+description)
+        user = Users.query.filter_by(username=username).first()
+        print(user)
+        if user :
+            new_chat = Chat(
+                user_id = user.id,
+                title = title,
+                description = description
+            )
+            db.session.add(new_chat)
+            db.session.commit()
+            return jsonify({
+                'chat_id':new_chat.id,
+                'chat_title':new_chat.title,
+                'user_name':user.username
+            })
+        else :
+            return jsonify({
+                'error':f'User: {username} not found!'
+            })
+
+    except Exception as e:
+        error_message = f"An error occurred: {str(e)}"
+        return jsonify({'error': error_message}), 500
+
+# Get all chats
+@app.route('/chats', methods=['GET'])
+def get_all_chats():
+    try:
+        chats = Chat.query.all()  # Use user_id instead of users
+        chat_list = [{'chat_id': chat.id, 'title': chat.title, 'description': chat.description} for chat in chats]
+        return jsonify(
+            {
+                'chats': chat_list,
+                'total_chats':len(chat_list)
+                }
+            )
+
+    except Exception as e:
+        error_message = f"An error occurred: {str(e)}"
+        return jsonify({'error': error_message}), 500
+
+
+# Get all chats for a user
+@app.route('/chats/<username>', methods=['GET'])
+def get_chats_of_a_user(username):
+    try:
+        user = Users.query.filter_by(username=username).first()
+        if not user :
+            return jsonify({
+                'error':f'Username: {username}, not found!'
+            })
+        chats = Chat.query.filter_by(user_id=user.id).all()  # Use user_id instead of users
+        chat_list = [{'chat_id': chat.id, 'title': chat.title, 'description': chat.description} for chat in chats]
+        return jsonify(
+            {
+                'chats': chat_list,
+                'total_chats':len(chat_list)
+                }
+            )
+
+    except Exception as e:
+        error_message = f"An error occurred: {str(e)}"
+        return jsonify({'error': error_message}), 500
+
+# Get a particular chats for a user
+@app.route('/chats/<username>/<chat_id>', methods=['GET'])
+def get_a_chat_of_a_user(username, chat_id):
+    try:
+        # print(username+" "+chat_id)
+        user = Users.query.filter_by(username=username).first()
+        if not user :
+            return jsonify({
+                'error':f'Username: {username}, not found!'
+            })
+        
+        chat = Chat.query.filter_by(id=chat_id,user_id=user.id).first()
+        if not chat :
+           return jsonify({
+                'error':f'Chat ID: {chat_id}, not found!'
+            })
+        # chat_list = [{'chat_id': chat.id, 'title': chat.title, 'description': chat.description} for chat in user.chats]
+        # print(chat_list)
+
+        # print(chat.title)
+        # chat = next(
+        #     (chat for chat in user.chats if chat['id'] == chat_id),
+        #     None
+        # )
+        # print([{'chat':chat.title}for chat in user.chats])
+
+        return jsonify({
+            'id':chat.id,
+            'title':chat.title,
+            'description':chat.description,
+            'user_id':chat.user_id
+        })
+
+    except Exception as e:
+        error_message = f"An error occurred: {str(e)}"
+        return jsonify({'error': error_message}), 500
+
+# Delete a chat
+@app.route('/chats/<chat_id>', methods=['DELETE'])
+def delete_chat(chat_id):
+    try:
+        chat = Chat.query.get(chat_id)
+        if chat:
+            db.session.delete(chat)
+            db.session.commit()
+            return jsonify({'message': 'Chat deleted successfully'})
+        else:
+            return jsonify({'error': 'Chat not found'}), 404
+
+    except Exception as e:
+        error_message = f"An error occurred: {str(e)}"
+        return jsonify({'error': error_message}), 500
+
+# Delete a chat of a user
+@app.route('/chats/<username>/<chat_id>', methods=['DELETE'])
+def delete_chat_of_a_user(username,chat_id):
+    try:
+        user = Users.query.filter_by(username=username).first()
+        if not user :
+            return jsonify({
+                'error':f'Username: {username}, not found!'
+            })
+        
+        chat = Chat.query.filter_by(id=chat_id,user_id=user.id).first()
+
+        if not chat :
+            return jsonify({
+                'error':f'Chat ID: {chat_id}, not found!'
+            })
+        
+        db.session.delete(chat)
+        db.session.commit()
+        return jsonify({'message': 'Chat deleted successfully'})
+
+    except Exception as e:
+        error_message = f"An error occurred: {str(e)}"
+        return jsonify({'error': error_message}), 500
+
 
 
 
