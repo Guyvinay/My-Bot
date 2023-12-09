@@ -24,13 +24,14 @@ class Chat(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(200))
-    conversations = db.relationship('Conversation', backref='chat', lazy=True)
+    conversations = db.relationship('Conversation', backref='chat', lazy=True, cascade='all, delete-orphan')
 
 class Conversation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     chat_id = db.Column(db.Integer, db.ForeignKey('chat.id'), nullable=False)
     prompt = db.Column(db.String(1500), nullable=False)
     response = db.Column(db.String(4000), nullable=False)
+
 
 #Creating modals
 with app.app_context():
@@ -238,7 +239,7 @@ def get_a_chat_of_a_user(username, chat_id):
         conversation_list = [
             {
                 'conversation_id': conversation.id, 'prompt': conversation.prompt, 
-                'description': conversation.response
+                'response': conversation.response
             } 
             for conversation in chat.conversations
             ]
@@ -293,13 +294,14 @@ def delete_chat_of_a_user(username,chat_id):
         
         chat = Chat.query.filter_by(id=chat_id,user_id=user.id).first()
 
-        if not chat :
+        if chat :
+            db.session.delete(chat)
+            db.session.commit()
+        else :
             return jsonify({
                 'error':f'Chat ID: {chat_id}, not found!'
-            })
-        
-        db.session.delete(chat)
-        db.session.commit()
+            })    
+
         return jsonify({'message': 'Chat deleted successfully'})
 
     except Exception as e:
