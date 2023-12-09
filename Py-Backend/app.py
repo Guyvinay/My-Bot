@@ -293,9 +293,11 @@ def delete_chat_of_a_user(username,chat_id):
 #chat-OPS-DONE-here
 
 #Conversation-withopen-ai-starts-here
-@app.route('chats/<username>/<chat_id>',methods=['POST'])
+@app.route('/chats/<username>/<chat_id>',methods=['POST'])
 def create_conversation_with_openai(username,chat_id) : 
     try :
+        data = request.get_json()
+        prompt = data.get('prompt','')
         # print(username+" "+chat_id)
         #Retrieving user with username
         user = Users.query.filter_by(username=username).first()
@@ -310,14 +312,29 @@ def create_conversation_with_openai(username,chat_id) :
            return jsonify({
                 'error':f'Chat ID: {chat_id}, not found!'
             })
-        print(chat)
+        # print(chat)
+
+
+        #Calling open AI api 
+        response = openai.Completion.create(
+            engine="text-davinci-003",
+            prompt=f'{prompt}\n',
+            max_tokens=150
+        )
+
+        # Extract the generated message from the OpenAI response
+        openai_response = response['choices'][0]['text'].strip()
+
+        print(openai_response)
+
+
         return jsonify({
-            "ststus":"OK"
+            "ststus":openai_response
         })
 
 
     except Exception as ex : 
-        error_message = f"An error occurred: {str(e)}"
+        error_message = f"An error occurred: {str(ex)}"
         return jsonify({'error': error_message}), 500
 
 
