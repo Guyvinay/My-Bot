@@ -26,6 +26,7 @@ class Users(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(50), nullable=False)
+    profile_pic = db.Column(db.String(250), nullable=False)
     name = db.Column(db.String(100))
     chats = db.relationship('Chat', backref='users', lazy=True)
 
@@ -57,6 +58,7 @@ def create_users():
         username = data.get('username','')
         password = data.get('password','')
         name = data.get('name','')
+        profile_pic = data.get('profile_pic','')
         # print(data)
         #Checking if user already exists
         existing_user = Users.query.filter_by(username=username).first()
@@ -67,9 +69,10 @@ def create_users():
         
         #create a new user
         new_user = Users(
+            name = name,
+            profile_pic = profile_pic,
             username = username,
-            password = password,
-            name = name
+            password = password
         )
         db.session.add(new_user)
         db.session.commit()
@@ -77,6 +80,7 @@ def create_users():
         return jsonify({
             'status':'user created successfully',
             'name':new_user.name,
+            'profile_pic':new_user.profile_pic,
             'user_id':new_user.id
         })
     #Exception handling
@@ -94,7 +98,8 @@ def get_all_users() :
             {
                 'user_id':user.id,
                 'username':user.username,
-                'name':user.name
+                'name':user.name,
+                'profile_pic':user.profile_pic
             }
             for user in users
         ]
@@ -158,6 +163,7 @@ def create_chats(username) :
         data = request.get_json()
         title = data.get('title','')
         description = data.get('description','')
+        # description = 'Chat Desciption'
         # print(title+" "+description)
         user = Users.query.filter_by(username=username).first()
         # print(user)
@@ -170,8 +176,9 @@ def create_chats(username) :
             db.session.add(new_chat)
             db.session.commit()
             return jsonify({
-                'chat_id':new_chat.id,
-                'chat_title':new_chat.title,
+                'id':new_chat.id,
+                'title':new_chat.title,
+                'desciption':new_chat.description,
                 'user_name':user.username
             })
         else :
@@ -193,7 +200,7 @@ def get_all_chats():
             {
                 'chats': chat_list,
                 'total_chats':len(chat_list)
-                }
+            }
             )
 
     except Exception as e:
@@ -384,6 +391,7 @@ def create_conversation_with_openai(username,chat_id) :
 
 # Getting conversation of a particular chat
 # @app.route('/chats/<username>/<chat_id>/')
+
 
 
 if __name__ == '__main__':
