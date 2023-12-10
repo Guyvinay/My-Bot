@@ -260,7 +260,7 @@ def get_a_chat_of_a_user(username, chat_id):
             } 
             for conversation in chat.conversations
             ]
-        print(conversation_list)
+        # print(conversation_list)
 
 
         # print(chat.title)
@@ -335,7 +335,7 @@ def create_conversation_with_openai(username,chat_id) :
         data = request.get_json()
         prompt = data.get('prompt','')
         user_prompt = data.get('prompt','')
-        # print(username+" "+chat_id)
+        print(user_prompt+" "+chat_id)
         #Retrieving user with username
         user = Users.query.filter_by(username=username).first()
         if not user :
@@ -354,7 +354,7 @@ def create_conversation_with_openai(username,chat_id) :
         # print(conversation_history)
 
         if conversation_history:
-            chat_history = '\n'.join([f'User: {conv.prompt}\nChatbot: {conv.response}' for conv in conversation_history])
+            chat_history = '\n'.join([f'User: {conv.prompt}\n {conv.response}' for conv in conversation_history])
             prompt = f'{chat_history}\nUser: {prompt}\n'
         else:
             # If no conversation history exists, start with the user's prompt
