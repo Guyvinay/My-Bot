@@ -1,1 +1,20 @@
-<p>max-gpt works!</p>
+<app-dashboard></app-dashboard>
+<div class="p-4 sm:ml-64">
+    <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 mt-14">
+        <div class="chat-container">
+            <div class="chat-box">
+              <div *ngFor="let message of messages" class="message">
+                <span class="sender">{{ message.sender }}:</span> {{ message.content }}
+                <!-- <span>User: {{message.User}}</span>
+                <span>Chatot: {{message.Chatbot}}</span> -->
+              </div>
+            </div>
+            <div class="user-input">
+              <!-- <input [(ngModel)]="userInput" type="text" placeholder="Type your message..." /> -->
+              <textarea [(ngModel)]="prompt.prompt" type="text" placeholder="Type your message..."  name="" id="textarea" rows="4"></textarea>
+              <button (click)="sendMessage()">Send</button>
+            </div>
+          </div>
+          
+    </div>
+</div>

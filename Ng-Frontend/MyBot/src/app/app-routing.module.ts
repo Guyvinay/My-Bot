@@ -5,7 +5,7 @@ import { MaxGptComponent } from './gpt/max-gpt/max-gpt.component';
 
 const routes: Routes = [
   {path:'dashboard', component:DashboardComponent},
-  {path:'max-gpt', component:MaxGptComponent},
+  {path:'max-gpt/:chat_id', component:MaxGptComponent},
   {path:'', redirectTo:'/dashboard', pathMatch:'full'},
 ];
 
